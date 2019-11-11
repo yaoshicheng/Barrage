@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+.bullet {
+  opacity: 0.01;
+}
+
+.bullet-enter-normal, .bullet-enter-fast, .bullet-enter-slow {
+  opacity: 1;
+  position: absolute;
+  left: 100vw;
+}
+
+.bullet-enter-normal.bullet-enter-normal-active {
+  opacity: .5;
+  position: absolute;
+  left: -100vw;
+  transition: all 6000ms linear;
+}
+
+.bullet-enter-fast.bullet-enter-fast-active {
+  opacity: .5;
+  position: absolute;
+  left: -100vw;
+  transition: all 3000ms linear;
+}
+
+.bullet-enter-slow.bullet-enter-slow-active {
+  opacity: .5;
+  position: absolute;
+  left: -100vw;
+  transition: all 9000ms linear;
+}
+
+.bullet_inner_container{
+  position: relative;
+  width: 90vw;
+  background: rgba(141,48,3,0.55);
+  overflow: hidden;
+  border-radius: 15px;
+}

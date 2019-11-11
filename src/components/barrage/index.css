@@ -1,0 +1,10 @@
+.m-barrage{
+  position:relative;
+  width:100%;
+  height:1000px;
+}
+
+.m-barrage-canvas{
+   width:100%;
+   height:100%;
+ }
