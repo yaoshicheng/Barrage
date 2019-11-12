@@ -6,6 +6,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      rtMsg: "实时弹幕消息",
       list: [
         "微信公众号liwusen00",
         "今晚有没有LOL的一块啊？",
@@ -60,15 +61,17 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    // setInterval(()=>{
-    //   let list = new Array(Math.ceil(Math.random()*100)).fill('测试数据：'+Math.random())
-    //   this.setState({ list });
-    // },5000)
+    let count = 0;
+    setInterval(()=>{
+      let rtMsg = "实时弹幕消息测试"+ count;
+      count ++;
+      this.setState({ rtMsg });
+    },1000)
   }
 
 
   render() {
-    const { list } = this.state;
+    const { list, rtMsg } = this.state;
     const colorConfig={
       random:false,
       colorList:['red']
@@ -76,7 +79,7 @@ class App extends React.Component {
     const customStyle = {
       font: '16px arial,sans-serif ',
       width: 1000,
-      height: 500,
+      height: 400,
     };
 
     const style = {
@@ -86,7 +89,7 @@ class App extends React.Component {
       // height: 500,
     };
     return (
-        <Barrage barrageList={list} color={colorConfig} lineNumber={10}  speed="normal" customStyle={customStyle} />
+        <Barrage barrageList={list} rtMsg={rtMsg} color={colorConfig}  speed="normal" customStyle={customStyle} />
 
       // <Bullet msg={msg} customStyle={{'height':'60px'}} height={60} lineNumber={2} />
     );

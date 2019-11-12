@@ -18,6 +18,11 @@ export default class Barrage extends React.Component{
     this.FASTSPEED = 5;
     this.SLOWSPEED = 2;
     this.NORMALSPEED = 3;
+    this.rtMsgList = [];
+    this.rtMsgLeft = [];
+    this.rtMsgTop = [];
+    this.rtMsgSpeed = [];
+    this.rtMsgColor = [];
   }
   componentDidMount(){
     this.initialBarrage(this.props);
@@ -29,11 +34,30 @@ export default class Barrage extends React.Component{
   // };
 
   componentWillReceiveProps(nextProps) {
-    this.initialBarrage(nextProps);
+    const { rtMsg, customStyle: { width, height } } = nextProps;
+    this.initialWith = document.body.clientWidth;
+    const canvasWidth= width || this.initialWith;
+    this.initialRtList(rtMsg,canvasWidth,height);
   }
 
+  initialRtList = (rtMsg,width,height) => {
+    if(rtMsg){
+      this.rtMsgList.push(rtMsg);
+      this.rtMsgLeft.push(width+100);
+      let random = Math.random();
+      if(random<0.2) {
+        random = 0.2;
+      }else if(random>0.8) {
+        random = 0.8;
+      }
+      this.rtMsgTop.push(height*random);
+      this.rtMsgSpeed.push(3+Math.random());
+      this.rtMsgColor.push(`#${Math.floor(Math.random()*0xffffff).toString(16)}` )
+    }
+  };
+
   initialBarrage = (props) => {
-    const { barrageList, color, customStyle: { width, height, font = '14px Courier New'  } } = props;
+    const { barrageList, rtMsg, customStyle: { width, height, font = '14px Courier New'  } } = props;
     this.initialWith = document.body.clientWidth;
     this.initialHeight = document.body.clientHeight;
     this.lineNumber = Math.ceil(height/30);
@@ -41,14 +65,17 @@ export default class Barrage extends React.Component{
     const ctx=canvas.getContext("2d");
     ctx.font = font;
     const canvasWidth= width || this.initialWith;
+
     const colors=this.getColor({random: true});
     const arrL=this.getLeft();
-    const max = arrL[arrL.length-1] - arrL[0];
-    const leftArray = [].concat(arrL);
     const arrT=this.getTop();
     const speedArr=this.getSpeed();
-    const _this = this;
-    this.timer = requestAnimationFrame(function fn(){
+
+    const max = arrL[arrL.length-1] - arrL[0];
+
+    this.initialRtList(rtMsg,canvasWidth,height);
+
+    const cb = ()=>{
       ctx.clearRect(0,0,canvas.width,canvas.height);
       ctx.save();
       for(let i=0;i<barrageList.length;i++){
@@ -57,19 +84,38 @@ export default class Barrage extends React.Component{
         ctx.font = font;
         ctx.fillText(barrageList[i], arrL[i], arrT[i]);
         if(arrL[i] <= -max){
-          // arrL[i] = leftArray[i]
           arrL[i] = canvasWidth;
         }
       }
+      // 绘制实时弹幕
+      for(let i=0;i<this.rtMsgList.length;i++){
+        if(this.rtMsgList[i]){
+          this.rtMsgLeft[i] -= this.rtMsgSpeed[i];
+          ctx.font = font;
+          ctx.fillStyle = this.rtMsgColor[i];
+          ctx.fillText(this.rtMsgList[i], this.rtMsgLeft[i], this.rtMsgTop[i]);
+          if(this.rtMsgLeft[i] <= -max){
+            this.rtMsgList[i] = null;
+            this.rtMsgList.shift();
+            this.rtMsgLeft.shift();
+            this.rtMsgTop.shift();
+            this.rtMsgSpeed.shift();
+            this.rtMsgColor.shift();
+          }
+        }
+      }
+
       ctx.restore();
-      _this.timer = requestAnimationFrame(fn);
-    });
+      this.timer = requestAnimationFrame(cb);
+    };
+    this.timer = requestAnimationFrame(cb);
   };
 
   getTop = () =>{
     let { barrageList, lineNumber} = this.props;
     const len = barrageList.length;
     const line = lineNumber || this.lineNumber;
+    console.log(line)
     const canvas = this.myCanvas.current;
     const height = canvas.height;
     const lineHeight  = Math.floor(height/line);
@@ -87,12 +133,12 @@ export default class Barrage extends React.Component{
   };
 
   getLeft = () =>{
-    const {barrageList = [], lineNumber = 2, customStyle:{ width }}= this.props;
+    const {barrageList = [], customStyle:{ width }}= this.props;
     const canvasWidth= width || this.initialWith;
-    const count = Math.ceil(barrageList.length/lineNumber);
+    const count = Math.ceil(barrageList.length/this.lineNumber);
     let arrL = [];
     for(let i=0;i<count;i++){
-      arrL = arrL.concat(new Array(lineNumber).fill(canvasWidth+ i*280))
+      arrL = arrL.concat(new Array(this.lineNumber).fill(canvasWidth+ i*280))
     }
     return arrL
   };
@@ -132,12 +178,14 @@ Barrage.propTypes = {
   barrageList: PropTypes.array,
   customStyle: PropTypes.object,
   speed: PropTypes.string,
-  lineNumber: PropTypes.number,
+  lineNumber: PropTypes.any,
+  rtMsg: PropTypes.string,
 };
 
 Barrage.defaultProps = {
   barrageList: [],
   customStyle: {},
   speed: 'normal',
-  lineNumber: 2,
+  lineNumber: 0,
+  rtMsg:'',
 };
